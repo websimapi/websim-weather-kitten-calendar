@@ -294,7 +294,19 @@ function generateKittenDescription() {
     return `Today's weather kittens are ${weatherPart || "playing around"} and ${tempPart || "having fun"}. The temperature is ${temperature}°C with ${weatherDescription}.`;
 }
 
-async function generateSmallKitten(container, index) {
+function addKittenAnimations() {
+    // Add a few smaller animated kittens that will walk around the calendar
+    const kittenCount = 5;
+    const calendar = document.getElementById('calendar');
+    
+    for (let i = 0; i < kittenCount; i++) {
+        setTimeout(() => {
+            generateSmallKitten(i);
+        }, i * 1000);
+    }
+}
+
+async function generateSmallKitten(index) {
     try {
         // Get a weather-appropriate prompt for a small kitten
         const weatherAction = getWeatherAction();
@@ -316,25 +328,150 @@ async function generateSmallKitten(container, index) {
         kittenElement.style.width = '50px';
         kittenElement.style.height = '50px';
         
-        // Position randomly
-        const maxX = container.clientWidth - 60;
-        const maxY = container.clientHeight - 60;
-        const xPos = Math.random() * maxX;
-        const yPos = Math.random() * maxY;
+        // Add to document body (to allow walking around calendar)
+        document.body.appendChild(kittenElement);
         
-        kittenElement.style.left = `${xPos}px`;
-        kittenElement.style.top = `${yPos}px`;
+        // Set initial position near the calendar
+        const calendar = document.getElementById('calendar');
+        const calendarRect = calendar.getBoundingClientRect();
         
-        // Add to container
-        container.appendChild(kittenElement);
+        // Position based on index to spread kittens around
+        let startPosition;
+        switch(index % 4) {
+            case 0: // Top
+                startPosition = {
+                    x: calendarRect.left + Math.random() * calendarRect.width,
+                    y: calendarRect.top - 50
+                };
+                break;
+            case 1: // Right
+                startPosition = {
+                    x: calendarRect.right + 10,
+                    y: calendarRect.top + Math.random() * calendarRect.height
+                };
+                break;
+            case 2: // Bottom
+                startPosition = {
+                    x: calendarRect.left + Math.random() * calendarRect.width,
+                    y: calendarRect.bottom + 10
+                };
+                break;
+            case 3: // Left
+                startPosition = {
+                    x: calendarRect.left - 50,
+                    y: calendarRect.top + Math.random() * calendarRect.height
+                };
+                break;
+        }
         
-        // Animate kitten after it loads
+        // Convert to page-relative positions
+        kittenElement.style.position = 'absolute';
+        kittenElement.style.left = `${startPosition.x}px`;
+        kittenElement.style.top = `${startPosition.y}px`;
+        
+        // Give each kitten different speed
+        const speed = 2000 + Math.random() * 3000;
+        
+        // Start animation after it loads
         kittenElement.onload = () => {
-            animateKitten(kittenElement, container);
+            animateKittenAroundCalendar(kittenElement, speed);
         };
     } catch (error) {
         console.error('Error generating small kitten:', error);
     }
+}
+
+function animateKittenAroundCalendar(kittenElement, speed) {
+    const calendar = document.getElementById('calendar');
+    const pathPoints = generatePathAroundElement(calendar, 20);
+    let currentPointIndex = 0;
+    let previousX = parseFloat(kittenElement.style.left);
+    
+    function moveToNextPoint() {
+        // Get next point on path
+        currentPointIndex = (currentPointIndex + 1) % pathPoints.length;
+        const nextPoint = pathPoints[currentPointIndex];
+        
+        // Determine direction for flipping
+        const currentX = parseFloat(kittenElement.style.left);
+        const isMovingLeft = nextPoint.x < currentX;
+        
+        // Add slight bounce effect with translateY
+        const bounceHeight = Math.random() * 5 + 2;
+        
+        // Flip horizontally if moving left
+        kittenElement.style.transform = isMovingLeft ? 
+            `scaleX(-1) translateY(${bounceHeight}px)` : 
+            `scaleX(1) translateY(${bounceHeight}px)`;
+            
+        // Move to next position with smooth transition
+        kittenElement.style.transition = `all ${speed/1000}s cubic-bezier(0.34, 1.56, 0.64, 1)`;
+        kittenElement.style.left = `${nextPoint.x}px`;
+        kittenElement.style.top = `${nextPoint.y}px`;
+        
+        // Store current x for next comparison
+        previousX = nextPoint.x;
+        
+        // Schedule next movement
+        setTimeout(moveToNextPoint, speed);
+    }
+    
+    // Start the animation
+    moveToNextPoint();
+}
+
+function generatePathAroundElement(element, padding) {
+    const rect = element.getBoundingClientRect();
+    const path = [];
+    const steps = 40; // Number of points around the element
+    
+    // Add padding to the rectangle
+    const paddedRect = {
+        top: rect.top - padding,
+        right: rect.right + padding,
+        bottom: rect.bottom + padding,
+        left: rect.left - padding,
+        width: rect.width + (padding * 2),
+        height: rect.height + (padding * 2)
+    };
+    
+    // Generate top edge points (left to right)
+    for (let i = 0; i <= steps; i++) {
+        path.push({
+            x: paddedRect.left + (paddedRect.width * i / steps),
+            y: paddedRect.top
+        });
+    }
+    
+    // Generate right edge points (top to bottom)
+    for (let i = 1; i <= steps; i++) {
+        path.push({
+            x: paddedRect.right,
+            y: paddedRect.top + (paddedRect.height * i / steps)
+        });
+    }
+    
+    // Generate bottom edge points (right to left)
+    for (let i = 1; i <= steps; i++) {
+        path.push({
+            x: paddedRect.right - (paddedRect.width * i / steps),
+            y: paddedRect.bottom
+        });
+    }
+    
+    // Generate left edge points (bottom to top)
+    for (let i = 1; i < steps; i++) {
+        path.push({
+            x: paddedRect.left,
+            y: paddedRect.bottom - (paddedRect.height * i / steps)
+        });
+    }
+    
+    // Add some randomness to make movement more natural
+    return path.map(point => ({
+        x: point.x + (Math.random() * 10 - 5),
+        y: point.y + (Math.random() * 10 - 5)
+    }));
 }
 
 function getWeatherAction() {
@@ -356,35 +493,6 @@ function getWeatherAction() {
     } else {
         const actions = ['playing with yarn', 'with butterfly', 'looking curious', 'with flower'];
         return actions[Math.floor(Math.random() * actions.length)];
-    }
-}
-
-function animateKitten(kittenElement, container) {
-    // Create animation for the kitten
-    const maxX = container.clientWidth - 60;
-    const maxY = container.clientHeight - 60;
-    
-    setInterval(() => {
-        // Random new position
-        const newX = Math.random() * maxX;
-        const newY = Math.random() * maxY;
-        
-        // Animate to new position
-        kittenElement.style.transition = 'all 3s ease';
-        kittenElement.style.left = `${newX}px`;
-        kittenElement.style.top = `${newY}px`;
-    }, 5000);
-}
-
-function addKittenAnimations() {
-    // Add a few smaller animated kittens based on weather
-    const kittenCount = 5;
-    const kittenContainer = document.getElementById('kitten-display');
-    
-    for (let i = 0; i < kittenCount; i++) {
-        setTimeout(() => {
-            generateSmallKitten(kittenContainer, i);
-        }, i * 1000);
     }
 }
 

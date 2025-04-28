@@ -45,7 +45,7 @@ h1 {
     margin-bottom: 1.5rem;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 #kitten-container {
@@ -61,8 +61,11 @@ h1 {
 #kitten-container img.main-kitten {
     height: 90%;
     object-fit: contain;
-    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2));
+    filter: none;
     transition: transform 0.3s ease;
+    box-shadow: none;
+    border: none;
+    outline: none;
 }
 
 #kitten-container img.main-kitten:hover {
@@ -170,10 +173,13 @@ h1 {
 
 .kitten-thumbnail {
     position: absolute;
-    transition: all 0.3s ease;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy effect */
     z-index: 1;
-    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.2));
-    mix-blend-mode: multiply;
+    filter: none;
+    mix-blend-mode: normal;
+    box-shadow: none;
+    border: none;
+    outline: none;
 }
 
 .sunny-theme {
