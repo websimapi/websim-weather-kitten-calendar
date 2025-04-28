@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Kitten Calendar</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "canvas-confetti": "https://cdn.skypack.dev/canvas-confetti"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Weather Kitten Calendar</h1>
+            <div id="weather-info">
+                <span id="location">Loading location...</span>
+                <span id="current-weather">Loading weather...</span>
+                <span id="temperature">--°</span>
+            </div>
+        </header>
+        
+        <div id="kitten-display">
+            <div id="kitten-container"></div>
+            <div id="loading-overlay">
+                <div class="spinner"></div>
+                <p>Generating weather kittens...</p>
+            </div>
+        </div>
+        
+        <div id="calendar">
+            <div class="calendar-header">
+                <button id="prev-month">&lt;</button>
+                <h2 id="month-year">Month Year</h2>
+                <button id="next-month">&gt;</button>
+            </div>
+            <div class="weekdays">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+            <div id="days-grid"></div>
+        </div>
+        
+        <div id="kitten-details">
+            <h3>Today's Weather Kittens</h3>
+            <p id="kitten-description">Our weather kittens are getting ready...</p>
+        </div>
+    </div>
+    
+    <script src="script.js" type="module"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
