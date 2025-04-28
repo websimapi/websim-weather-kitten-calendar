@@ -213,11 +213,11 @@ async function generateWeatherKittens() {
             aspect_ratio: "1:1",
         });
         
-        // Process the image to make white background transparent
+        // Create and add the main kitten to container
         const mainKittenImg = document.createElement('img');
         mainKittenImg.src = kittenResult.url;
         mainKittenImg.alt = "Weather kitten";
-        mainKittenImg.onload = () => makeBackgroundTransparent(mainKittenImg);
+        mainKittenImg.className = 'main-kitten';
         
         // Add the main kitten to container
         kittenContainer.appendChild(mainKittenImg);
@@ -235,7 +235,8 @@ async function generateWeatherKittens() {
 }
 
 function generateKittenPrompt() {
-    let basePrompt = "Cute tiny cartoon kitten with a white background";
+    // Instead of asking for white background, request a transparent background
+    let basePrompt = "Cute tiny cartoon kitten with transparent background";
     
     if (currentWeather.includes('clear') || currentWeather.includes('sun')) {
         return `${basePrompt}, playing happily in sunshine, wearing sunglasses`;
@@ -293,51 +294,11 @@ function generateKittenDescription() {
     return `Today's weather kittens are ${weatherPart || "playing around"} and ${tempPart || "having fun"}. The temperature is ${temperature}°C with ${weatherDescription}.`;
 }
 
-function makeBackgroundTransparent(img) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    
-    // Draw the image on canvas
-    ctx.drawImage(img, 0, 0);
-    
-    // Get image data
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    // Loop through the pixels
-    for (let i = 0; i < data.length; i += 4) {
-        // If pixel is white or close to white, make it transparent
-        if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) {
-            data[i + 3] = 0; // Set alpha to 0
-        }
-    }
-    
-    // Put the modified data back on the canvas
-    ctx.putImageData(imageData, 0, 0);
-    
-    // Update the image source
-    img.src = canvas.toDataURL('image/png');
-}
-
-function addKittenAnimations() {
-    // Add a few smaller animated kittens based on weather
-    const kittenCount = 5;
-    const kittenContainer = document.getElementById('kitten-display');
-    
-    for (let i = 0; i < kittenCount; i++) {
-        setTimeout(() => {
-            generateSmallKitten(kittenContainer, i);
-        }, i * 1000);
-    }
-}
-
 async function generateSmallKitten(container, index) {
     try {
         // Get a weather-appropriate prompt for a small kitten
         const weatherAction = getWeatherAction();
-        const prompt = `Simple tiny kitten ${weatherAction} with white background, cartoon style`;
+        const prompt = `Simple tiny kitten ${weatherAction} with transparent background, cartoon style`;
         
         // Generate kitten image
         const kittenResult = await websim.imageGen({
@@ -367,9 +328,8 @@ async function generateSmallKitten(container, index) {
         // Add to container
         container.appendChild(kittenElement);
         
-        // Make background transparent on load
+        // Animate kitten after it loads
         kittenElement.onload = () => {
-            makeBackgroundTransparent(kittenElement);
             animateKitten(kittenElement, container);
         };
     } catch (error) {
@@ -416,6 +376,18 @@ function animateKitten(kittenElement, container) {
     }, 5000);
 }
 
+function addKittenAnimations() {
+    // Add a few smaller animated kittens based on weather
+    const kittenCount = 5;
+    const kittenContainer = document.getElementById('kitten-display');
+    
+    for (let i = 0; i < kittenCount; i++) {
+        setTimeout(() => {
+            generateSmallKitten(kittenContainer, i);
+        }, i * 1000);
+    }
+}
+
 function showLoadingOverlay(show) {
     const overlay = document.getElementById('loading-overlay');
     if (show) {
@@ -424,4 +396,3 @@ function showLoadingOverlay(show) {
         overlay.style.display = 'none';
     }
 }
-
